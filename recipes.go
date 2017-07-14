@@ -18,21 +18,6 @@ type Ingredient struct {
 	Category string
 }
 
-type Result struct {
-	Raw                []byte
-	ID                 string
-	Name               string
-	Cost               uint32
-	Hearts             uint32
-	Duration           uint32
-	Effect             uint32
-	EffectString       string
-	Strength           uint32
-	StrengthString     string
-	IngredientsFromMem string
-	IngredientsIn      string
-}
-
 func (r Result) String() string {
 	lines := []string{}
 	eff := r.EffectString

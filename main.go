@@ -31,9 +31,9 @@ func init() {
 var ctx, cancel = context.WithCancel(context.Background())
 
 func main() {
+	go dumpToGithub()
 	catchSigs()
 	loadRecipes()
-	return
 	prcs, err := ps.Processes()
 	e(err)
 	var pid uint32
