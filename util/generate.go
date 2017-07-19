@@ -3,12 +3,13 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"go/format"
 	"io/ioutil"
 	"log"
 	"strings"
 	"text/template"
+
+	"github.com/captncraig/wildchef/constants"
 )
 
 func must(err error) {
@@ -22,21 +23,25 @@ func main() {
 	must(err)
 	nameLookup := map[string]string{}
 	must(json.Unmarshal(dat, &nameLookup))
-	constants := map[string]string{}
+	consts := map[string]string{}
 	for k, v := range nameLookup {
-		constants[clean(v)] = v
+		consts[clean(v)] = v
 		nameLookup[k] = clean(v)
 	}
 	ctx := map[string]interface{}{
-		"Consts":     constants,
+		"Consts":     consts,
 		"NameLookup": nameLookup,
+		"Sprites":    constants.SpriteLocations,
 	}
 	buf := &bytes.Buffer{}
 	must(gotpl.Execute(buf, ctx))
-	fmt.Println(buf.String())
 	dat, err = format.Source(buf.Bytes())
 	must(err)
 	ioutil.WriteFile("constants/constants.go", dat, 0777)
+
+	buf.Reset()
+	must(tsTpl.Execute(buf, ctx))
+	ioutil.WriteFile("gen.ts", buf.Bytes(), 0777)
 }
 
 func clean(s string) string {
@@ -54,6 +59,23 @@ const(
 )
 var ItemIds = map[string]string{
 	{{range $k,$v := .NameLookup}}"{{$k}}": {{$v}},
+	{{end -}}
+}
+`))
+
+var tsTpl = template.Must(template.New("").Parse(`
+export var Names = {
+	{{range $k,$v := .Consts}} {{$k}}: "{{$v}}",
+	{{end -}}
+}
+
+export interface SpriteLoc{
+	X: number;
+	Y: number;
+}
+
+export var Sprites: {[id: string]: SpriteLoc} = {
+	{{range $k,$v := .Sprites}} "{{$k}}": {X: {{$v.X}}, Y: {{$v.Y}}},
 	{{end -}}
 }
 `))
