@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"encoding/binary"
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -14,26 +13,26 @@ import (
 	"time"
 	"unsafe"
 
+	"sort"
+
 	"github.com/JamesHovious/w32"
+	"github.com/captncraig/wildchef/constants"
 	"github.com/mitchellh/go-ps"
 )
 
 var handle w32.HANDLE
-var itemNames map[string]string
-
-func init() {
-	log.SetFlags(log.LstdFlags | log.Lshortfile)
-	dat, err := ioutil.ReadFile("items.json")
-	e(err)
-	e(json.Unmarshal(dat, &itemNames))
-}
 
 var ctx, cancel = context.WithCancel(context.Background())
 
+var inventoryBaseAddr uint64
+var regionSize uint64
+
 func main() {
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
+	fixData()
 	go dumpToGithub()
 	catchSigs()
-	loadRecipes()
+	go loadRecipes()
 	prcs, err := ps.Processes()
 	e(err)
 	var pid uint32
@@ -51,38 +50,39 @@ func main() {
 	handle, err = w32.OpenProcess(w32.PROCESS_VM_OPERATION|w32.PROCESS_VM_READ|w32.PROCESS_VM_WRITE|w32.PROCESS_QUERY_INFORMATION, false, pid)
 	e(err)
 	defer w32.CloseHandle(handle)
-	regionStart, regionSize := findRegionBySize()
+	var regionStart uint64
+	regionStart, regionSize = findRegionBySize()
 	fmt.Printf("Memory Region found at 0x%0xd (0x%0xd bytes)\n", regionStart, regionSize)
-	addr := findInventoryAddr(regionStart, regionSize)
-	fmt.Printf("Inventory Address Found at 0x%0xd (%d)\n", addr, addr)
-	items := readItems(addr, addr+regionSize)
-	fmt.Printf("Found %d items\n", len(items))
-	if len(items) > 0 {
-		runAhk(genAhkClear(len(items)))
-	}
-	for i := 0; i < len(allRecipes); i++ {
-		recipe := allRecipes[i]
+	inventoryBaseAddr = findInventoryAddr(regionStart, regionSize)
+	fmt.Printf("Inventory Address Found at 0x%0xd (%d)\n", inventoryBaseAddr, inventoryBaseAddr)
+	topOffQtys()
+	clearFood()
+	i := -1
+	for recipe := range allRecipes {
+		i++
 		names := []string{}
 		for _, ing := range recipe {
 			names = append(names, ing.Name)
 		}
+		rawNames := strings.Join(names, ",")
+		sort.Strings(names)
 		ingsIn := strings.Join(names, ",")
 		if haveRecipe(ingsIn) {
 			continue
 		}
-		fmt.Println("Cooking", i, ingsIn)
+		fmt.Println("Cooking", i, rawNames)
 		runAhk(recipe.genAhk())
 		time.Sleep(time.Second / 2)
-		items := readItems(addr, addr+regionSize)
+		items := readItems("food")
 		found := false
 		for _, item := range items {
 			if !itemAddrs[item.addr] {
 				res := getItemInfo(item.addr)
 				fmt.Println(res)
-				if res.IngredientsFromMem != ingsIn {
+				if res.Ingredients != ingsIn {
 					log.Fatal("Ingredients no match. Uh oh.")
 				}
-				putRecipe(res, ingsIn)
+				putRecipe(res)
 				itemAddrs[item.addr] = true
 				found = true
 				break
@@ -92,12 +92,28 @@ func main() {
 			log.Fatal("Something wrong. Didn't find it.")
 		}
 		if len(items) > 14 {
-			fmt.Println("Clearing Items")
-			runAhk(genAhkClear(len(items)))
-			itemAddrs = map[uint64]bool{}
-			time.Sleep(time.Second / 2)
+			topOffQtys()
+			clearFood()
 		}
 	}
+}
+
+func topOffQtys() {
+	ingredients := readItems("ings")
+	for _, ing := range ingredients {
+		w32.WriteProcessMemory(handle, ing.addr-19, []byte{0, 0, 0, 200}, 4)
+	}
+}
+
+func clearFood() {
+	items := readItems("food")
+	fmt.Printf("Found %d food items\n", len(items))
+	if len(items) > 0 {
+		fmt.Println("Clearing Food Items")
+		runAhk(genAhkClear(len(items)))
+		time.Sleep(time.Second / 2)
+	}
+	itemAddrs = map[uint64]bool{}
 }
 
 var itemAddrs = map[uint64]bool{}
@@ -109,11 +125,13 @@ type ItemPtr struct {
 	id   string
 }
 
-func readItems(addr uint64, endAddr uint64) []ItemPtr {
+func readItems(cat string) []ItemPtr {
 	items := []ItemPtr{}
 	d := func(a ...interface{}) {
 		//fmt.Println(a...)
 	}
+	addr := inventoryBaseAddr
+	endAddr := addr + regionSize
 	for ; addr < endAddr; addr += 0x220 {
 		buf, err := w32.ReadProcessMemory(handle, addr, size)
 		e(err)
@@ -127,20 +145,34 @@ func readItems(addr uint64, endAddr uint64) []ItemPtr {
 				i++
 			}
 			name := string(strBuf[:i])
+			keep := false
+			// none of these
 			if strings.HasPrefix(name, "Weapon") || strings.Contains(name, "Arrow") || strings.HasPrefix(name, "Armor") {
 				continue
 			}
-			if !strings.HasPrefix(name, "Item_Cook") && !strings.HasPrefix(name, "Item_Roast") {
-				continue
+			any := func(prefixes ...string) bool {
+				for _, p := range prefixes {
+					if strings.HasPrefix(name, p) {
+						return true
+					}
+				}
+				return false
 			}
-			itemAddr := addr + 7
-			d(itemAddr, name)
-			items = append(items, ItemPtr{addr: itemAddr, id: name})
+			if cat == "food" && any("Item_Cook", "Item_Roast") {
+				keep = true
+			}
+
+			if cat == "ings" && any("Item_Fruit", "Item_Mushroom", "Item_Plant", "Item_Fish", "Item_Meat", "Animal_Insect",
+				"BeeHome", "Obj_Fir", "Item_Insect", "Item_Enemy", "Item_Ore", "Item_Material") {
+				keep = true
+			}
+			if keep {
+				itemAddr := addr + 7
+				d(itemAddr, name)
+				items = append(items, ItemPtr{addr: itemAddr, id: name})
+			}
 		}
 	}
-	//COST: 0x49
-	//Bonus: 0x41
-
 	return items
 }
 
@@ -157,7 +189,7 @@ func getItemInfo(addr uint64) Result {
 	r.Raw = raw
 
 	r.ID = readString(addr + 1)
-	r.Name = itemNames[r.ID]
+	r.Name = constants.ItemIds[r.ID]
 	r.Cost = readInt(addr + 0x49)
 	r.Hearts = readInt(addr + 0x41)
 	r.Duration = readInt(addr + 0x45)
@@ -173,12 +205,13 @@ func getItemInfo(addr uint64) Result {
 		if iname == "" {
 			break
 		}
-		if itemNames[iname] == "" {
+		if constants.ItemIds[iname] == "" {
 			log.Fatal("Unknown Item ID", iname)
 		}
-		strs = append(strs, itemNames[iname])
+		strs = append(strs, constants.ItemIds[iname])
 	}
-	r.IngredientsFromMem = strings.Join(strs, ",")
+	sort.Strings(strs)
+	r.Ingredients = strings.Join(strs, ",")
 	return r
 }
 

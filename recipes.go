@@ -6,8 +6,11 @@ import (
 	"io/ioutil"
 	"log"
 	"os/exec"
+	"sort"
 	"strings"
 	"time"
+
+	. "github.com/captncraig/wildchef/constants"
 )
 
 type Ingredient struct {
@@ -37,12 +40,12 @@ func (r Result) String() string {
 Name: %s %s (%s)
   %d rupees   %.2g hearts
   %s
-%s~~~~~~~~~~~~~~~~~~~~`, eff, r.Name, r.ID, r.Cost, float64(r.Hearts)/4, r.IngredientsFromMem, strings.Join(lines, "\n"))
+%s~~~~~~~~~~~~~~~~~~~~`, eff, r.Name, r.ID, r.Cost, float64(r.Hearts)/4, r.Ingredients, strings.Join(lines, "\n"))
 }
 
 type Recipe []*Ingredient
 
-var allRecipes []Recipe
+var allRecipes = make(chan Recipe)
 var allIngs = map[string]*Ingredient{}
 
 func loadRecipes() {
@@ -72,90 +75,236 @@ func loadRecipes() {
 		allIngs[ing.Name] = ing
 	}
 	//All ingredients. Once.
-	// for _, i := range ings {
-	// 	r(i)
-	// }
+	for _, i := range ings {
+		r(i)
+	}
 
-	// shouldMake := func(a, b *Ingredient) bool {
-	// 	cats := []string{a.Category, b.Category}
-	// 	sort.Strings(cats)
-	// 	catsJ := strings.Join(cats, ",")
-	// 	if strings.Contains(a.Name, "Dinraal") || strings.Contains(b.Name, "Dinraal") {
-	// 		return false
-	// 	}
-	// 	if strings.Contains(a.Name, "Nyadra") || strings.Contains(b.Name, "Nyadra") {
-	// 		return false
-	// 	}
-	// 	if catsJ == "Insect,Monster" {
-	// 		return true
-	// 	}
-	// 	//monsters are dubious
-	// 	if strings.Contains(catsJ, "Monster") {
-	// 		// let's use bokoblins no matter what
-	// 		if a.Name == "Bokoblin Guts" || b.Name == "Bokoblin Guts" {
-	// 			return true
-	// 		}
-	// 		return false
-	// 	}
-	// 	// any insects left will give dubious food
-	// 	if strings.Contains(catsJ, "Insect") {
-	// 		// let's use Cold Darner no matter what
-	// 		if a.Name == "Cold Darner" || b.Name == "Cold Darner" {
-	// 			return true
-	// 		}
-	// 		return false
-	// 	}
-	// 	return true
-	// }
+	// for 2 ingredients, this tells if it is interesting
+	shouldMake := func(a, b *Ingredient) bool {
+		cats := []string{a.Category, b.Category}
+		sort.Strings(cats)
+		catsJ := strings.Join(cats, ",")
+		if strings.Contains(a.Name, "Dinraal") || strings.Contains(b.Name, "Dinraal") {
+			return false
+		}
+		if strings.Contains(a.Name, "Nyadra") || strings.Contains(b.Name, "Nyadra") {
+			return false
+		}
+		if catsJ == "Insect,Monster" {
+			return true
+		}
+		//monsters are dubious
+		if strings.Contains(catsJ, "Monster") {
+			// let's use bokoblins no matter what
+			if a.Name == "Bokoblin Guts" || b.Name == "Bokoblin Guts" {
+				return true
+			}
+			return false
+		}
+		// any insects left will give dubious food
+		if strings.Contains(catsJ, "Insect") {
+			// let's use Cold Darner no matter what
+			if a.Name == "Cold Darner" || b.Name == "Cold Darner" {
+				return true
+			}
+			return false
+		}
+		return true
+	}
 
 	// // everything together 1:1
-	// for i := 0; i < len(ings); i++ {
-	// 	for j := i + i; j < len(ings); j++ {
-	// 		a := ings[i]
-	// 		b := ings[j]
-	// 		if shouldMake(a, b) {
-	// 			r(a, b)
-	// 		}
-	// 	}
-	// }
+	for i := 0; i < len(ings); i++ {
+		for j := i + i; j < len(ings); j++ {
+			a := ings[i]
+			b := ings[j]
+			if shouldMake(a, b) {
+				r(a, b)
+			}
+		}
+	}
 
 	// //2,3,4,5 of each
-	// for _, i := range ings {
-	// 	r(i, i)
-	// 	r(i, i, i)
-	// 	r(i, i, i, i)
-	// 	r(i, i, i, i, i)
-	// }
-	some := []string{
-		"Apple",
-		"Voltfruit",
-		"Hylian Mushroom",
-		"Zapshroom",
-		"Hyrule Herb",
-		"Electric Safflina",
-		"Raw Prime Meat",
-		"Courser Bee Honey",
-		"Hylian Rice",
-		"Bird Egg",
-		"Tabantha Wheat",
-		"Fresh Milk",
-		"Acorn",
-		"Cane Sugar",
-		"Goat Butter",
-		"Goron Spice",
-		"Rock Salt",
-		"Monster Extract",
-		"Star Fragment",
-		"Bokoblin Horn",
-		"Amber",
-		"Fairy",
-		"Electric Darner",
+	for _, i := range ings {
+		r(i, i)
+		r(i, i, i)
+		r(i, i, i, i)
+		r(i, i, i, i, i)
 	}
-	allCombos(some)
-	fmt.Println(len(allRecipes))
+
+	// all hearty
+	hearty := []string{
+		HeartyDurian,
+		BigHeartyTruffle,
+		HeartyTruffle,
+		BigHeartyRadish,
+		HeartyRadish,
+		HeartySalmon,
+		HeartyBlueshellSnail,
+		HeartyBass,
+		HeartyLizard,
+		LynelGuts,
+	}
+
+	// energizing
+	energizing := []string{
+		StamellaMushroom,
+		RestlessCricket,
+		CourserBeeHoney,
+		BrightEyedCrab,
+		StaminokaBass,
+		EnergeticRhinoBeetle,
+		LynelGuts,
+	}
+
+	//enduring
+	enduring := []string{
+		EnduraShroom,
+		TirelessFrog,
+		EnduraCarrot,
+		LynelGuts,
+	}
+
+	//Spicy
+	spicy := []string{
+		SpicyPepper,
+		WarmSafflina,
+		SummerwingButterfly,
+		Sunshroom,
+		WarmDarner,
+		SizzlefinTrout,
+		LynelGuts,
+	}
+
+	//chilly
+	chilly := []string{
+		Hydromelon,
+		CoolSafflina,
+		WinterwingButterfly,
+		Chillshroom,
+		ColdDarner,
+		ChillfinTrout,
+		LynelGuts,
+	}
+
+	//electro
+	electro := []string{
+		Voltfruit,
+		ElectricSafflina,
+		ThunderwingButterfly,
+		Zapshroom,
+		ElectricDarner,
+		VoltfinTrout,
+		LynelGuts,
+	}
+
+	//fireproof
+	fireproof := []string{
+		FireproofLizard,
+		SmotherwingButterfly,
+		LynelGuts,
+	}
+
+	//hasty
+	hasty := []string{
+		Rushroom,
+		SwiftCarrot,
+		HightailLizard,
+		FleetLotusSeeds,
+		SwiftViolet,
+		HotFootedFrog,
+		LynelGuts,
+	}
+
+	//sneaky
+	sneaky := []string{
+		BlueNightshade,
+		SneakyRiverSnail,
+		SunsetFirefly,
+		SilentShroom,
+		StealthfinTrout,
+		SilentPrincess,
+		LynelGuts,
+	}
+
+	//mighty
+	mighty := []string{
+		MightyThistle,
+		BladedRhinoBeetle,
+		MightyBananas,
+		Razorshroom,
+		MightyCarp,
+		RazorclawCrab,
+		MightyPorgy,
+		LynelGuts,
+	}
+
+	//tough
+	tough := []string{
+		Armoranth,
+		RuggedRhinoBeetle,
+		FortifiedPumpkin,
+		Ironshroom,
+		ArmoredCarp,
+		IronshellCrab,
+		ArmoredPorgy,
+		LynelGuts,
+	}
+
+	// a bunch of interesting things, including most ingredients
+	interesting := []string{
+		Apple,
+		Voltfruit,
+		HylianMushroom,
+		Zapshroom,
+		HyruleHerb,
+		ElectricSafflina,
+		RawPrimeMeat,
+		CourserBeeHoney,
+		HylianRice,
+		BirdEgg,
+		TabanthaWheat,
+		FreshMilk,
+		Acorn,
+		CaneSugar,
+		GoatButter,
+		GoronSpice,
+		RockSalt,
+		MonsterExtract,
+		StarFragment,
+		BokoblinHorn,
+		Amber,
+		Fairy,
+		ElectricDarner,
+	}
+
+	allCombos(hearty...)
+	allCombos(energizing...)
+	allCombos(enduring...)
+	allCombos(energizing...)
+	allCombos(spicy...)
+	allCombos(chilly...)
+	allCombos(electro...)
+	allCombos(fireproof...)
+	allCombos(hasty...)
+	allCombos(sneaky...)
+	allCombos(mighty...)
+	allCombos(tough...)
+	allCombos(interesting...)
+
+	// and finish out with a brute force search.
+	allNames := []string{}
+	for _, i := range ings {
+		allNames = append(allNames, i.Name)
+	}
+	allCombos(allNames...)
 }
 
-func allCombos(i []string) {
+func allCombos(i ...string) {
+	for _, s := range i {
+		if allIngs[s] == nil {
+			panic("YOU DON'T HAVE " + s)
+		}
+	}
 	for a := 0; a < len(i); a++ {
 		ia := allIngs[i[a]]
 		r(ia)
@@ -180,7 +329,7 @@ func allCombos(i []string) {
 
 func r(i ...*Ingredient) Recipe {
 	r := Recipe(i)
-	allRecipes = append(allRecipes, r)
+	allRecipes <- r
 	return r
 }
 
