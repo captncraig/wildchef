@@ -1,10 +1,8 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os/exec"
 	"sort"
 	"strings"
@@ -12,14 +10,6 @@ import (
 
 	. "github.com/captncraig/wildchef/constants"
 )
-
-type Ingredient struct {
-	Name     string
-	InvX     int
-	InvY     int
-	InvPage  int
-	Category string
-}
 
 func (r Result) String() string {
 	lines := []string{}
@@ -49,14 +39,7 @@ var allRecipes = make(chan Recipe)
 var allIngs = map[string]*Ingredient{}
 
 func loadRecipes() {
-	var ings = []*Ingredient{}
-	dat, err := ioutil.ReadFile("ingredients.json")
-	if err != nil {
-		log.Fatal(err)
-	}
-	if err = json.Unmarshal(dat, &ings); err != nil {
-		log.Fatal(err)
-	}
+	var ings = Ingredients
 	//set x,y,page
 	x, y, page := 0, 0, 0
 	for _, ing := range ings {

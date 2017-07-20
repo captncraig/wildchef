@@ -35,14 +35,14 @@ func dumpToGithub() {
 		gOpts := &github.RepositoryContentGetOptions{
 			Ref: "master",
 		}
-		_, fInfo, _, err := client.Repositories.GetContents(context.Background(), "captncraig", "wildchef", "docs", gOpts)
+		_, fInfo, _, err := client.Repositories.GetContents(context.Background(), "captncraig", "wildchef", "", gOpts)
 		if err != nil {
 			fmt.Println("!!!", err)
 			continue
 		}
 		var sha string
 		for _, f := range fInfo {
-			if f.GetPath() == "docs/results.json" {
+			if f.GetPath() == "results.json" {
 				sha = f.GetSHA()
 				break
 			}
@@ -53,7 +53,7 @@ func dumpToGithub() {
 			SHA:     &sha,
 			Message: &msg,
 		}
-		_, _, err = client.Repositories.UpdateFile(context.Background(), "captncraig", "wildchef", "docs/results.json", opts)
+		_, _, err = client.Repositories.UpdateFile(context.Background(), "captncraig", "wildchef", "results.json", opts)
 		fmt.Println(err)
 	}
 }

@@ -1,0 +1,9 @@
+.test{
+    float: left;
+    height: 96px;
+    width: 96px;
+
+    outline: 2px solid black; /* use instead of border */
+    margin-top: 2px;
+    margin-left: 2px;
+}

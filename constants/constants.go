@@ -82,7 +82,7 @@ const (
 	FleetLotusSeeds          = "Fleet-Lotus Seeds"
 	Flint                    = "Flint"
 	FortifiedPumpkin         = "Fortified Pumpkin"
-	FragrantMushroomSauté    = "Fragrant Mushroom Sauté"
+	FragrantMushroomSaute    = "Fragrant Mushroom Sauté"
 	FreshMilk                = "Fresh Milk"
 	FriedBananas             = "Fried Bananas"
 	FriedEggandRice          = "Fried Egg and Rice"
@@ -124,7 +124,7 @@ const (
 	HeartySalmon             = "Hearty Salmon"
 	HeartyTruffle            = "Hearty Truffle"
 	HeartyTrufflex0          = "Hearty Truffle x0"
-	HerbSauté                = "Herb Sauté"
+	HerbSaute                = "Herb Sauté"
 	HightailLizard           = "Hightail Lizard"
 	HinoxGuts                = "Hinox Guts"
 	HinoxToenail             = "Hinox Toenail"
@@ -198,7 +198,7 @@ const (
 	PepperSeafood            = "Pepper Seafood"
 	PepperSteak              = "Pepper Steak"
 	PlainCrepe               = "Plain Crepe"
-	PorgyMeunière            = "Porgy Meunière"
+	PorgyMeuniere            = "Porgy Meunière"
 	PoultryCurry             = "Poultry Curry"
 	PoultryPilaf             = "Poultry Pilaf"
 	PrimeMeatCurry           = "Prime Meat Curry"
@@ -249,7 +249,7 @@ const (
 	Ruby                     = "Ruby"
 	RuggedRhinoBeetle        = "Rugged Rhino Beetle"
 	Rushroom                 = "Rushroom"
-	SalmonMeunière           = "Salmon Meunière"
+	SalmonMeuniere           = "Salmon Meunière"
 	SalmonRisotto            = "Salmon Risotto"
 	SaltGrilledCrab          = "Salt-Grilled Crab"
 	SaltGrilledFish          = "Salt-Grilled Fish"
@@ -260,11 +260,11 @@ const (
 	SaltGrilledPrimeMeat     = "Salt-Grilled Prime Meat"
 	SankeCarp                = "Sanke Carp"
 	Sapphire                 = "Sapphire"
-	SautéedNuts              = "Sautéed Nuts"
-	SautéedPeppers           = "Sautéed Peppers"
+	SauteedNuts              = "Sautéed Nuts"
+	SauteedPeppers           = "Sautéed Peppers"
 	SeafoodCurry             = "Seafood Curry"
 	SeafoodFriedRice         = "Seafood Fried Rice"
-	SeafoodMeunière          = "Seafood Meunière"
+	SeafoodMeuniere          = "Seafood Meunière"
 	SeafoodPaella            = "Seafood Paella"
 	SeafoodRiceBalls         = "Seafood Rice Balls"
 	SeafoodSkewers           = "Seafood Skewers"
@@ -400,8 +400,8 @@ var ItemIds = map[string]string{
 	"Item_Cook_B_18":      PrimeMeatandSeafoodFry,
 	"Item_Cook_B_19":      GourmetMeatandSeafoodFry,
 	"Item_Cook_B_20":      MeatStuffedPumpkin,
-	"Item_Cook_B_21":      SautéedPeppers,
-	"Item_Cook_B_22":      SautéedNuts,
+	"Item_Cook_B_21":      SauteedPeppers,
+	"Item_Cook_B_22":      SauteedNuts,
 	"Item_Cook_B_23":      SeafoodSkewers,
 	"Item_Cook_C_16":      FairyTonic,
 	"Item_Cook_C_17":      Elixir,
@@ -437,9 +437,9 @@ var ItemIds = map[string]string{
 	"Item_Cook_G_15":      MeatyRiceBalls,
 	"Item_Cook_G_16":      CrabOmeletwithRice,
 	"Item_Cook_G_17":      CrabRisotto,
-	"Item_Cook_H_01":      SeafoodMeunière,
-	"Item_Cook_H_02":      PorgyMeunière,
-	"Item_Cook_H_03":      SalmonMeunière,
+	"Item_Cook_H_01":      SeafoodMeuniere,
+	"Item_Cook_H_02":      PorgyMeuniere,
+	"Item_Cook_H_03":      SalmonMeuniere,
 	"Item_Cook_I_01":      FruitPie,
 	"Item_Cook_I_02":      ApplePie,
 	"Item_Cook_I_03":      EggTart,
@@ -487,8 +487,8 @@ var ItemIds = map[string]string{
 	"Item_Cook_N_04":      MushroomOmelet,
 	"Item_Cook_O_01":      DubiousFood,
 	"Item_Cook_O_02":      RockHardFood,
-	"Item_Cook_P_01":      FragrantMushroomSauté,
-	"Item_Cook_P_02":      HerbSauté,
+	"Item_Cook_P_01":      FragrantMushroomSaute,
+	"Item_Cook_P_02":      HerbSaute,
 	"Item_Cook_P_03":      SpicedMeatSkewer,
 	"Item_Cook_P_04":      PrimeSpicedMeatSkewer,
 	"Item_Cook_P_05":      GourmetSpicedMeatSkewer,

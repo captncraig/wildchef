@@ -9758,27 +9758,177 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __generator = (this && this.__generator) || function (thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = y[op[0] & 2 ? "return" : op[0] ? "throw" : "next"]) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [0, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = __webpack_require__(82);
 var ReactDOM = __webpack_require__(98);
+var gen_1 = __webpack_require__(184);
 // 'HelloProps' describes the shape of props.
 // State is never set so we use the 'undefined' type.
-var Hello = (function (_super) {
-    __extends(Hello, _super);
-    function Hello() {
+var TestSuite = (function (_super) {
+    __extends(TestSuite, _super);
+    function TestSuite() {
+        var _this = _super.call(this) || this;
+        _this.onEnter = function (tst) {
+            _this.setState({ Shown: tst });
+        };
+        _this.onLeave = function () {
+            _this.setState({ Shown: null });
+        };
+        _this.state = { Tests: [] };
+        return _this;
+    }
+    TestSuite.prototype.componentDidMount = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var resp, dat, tsts, _i, dat_1, r;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, fetch("https://raw.githubusercontent.com/captncraig/wildchef/master/results.json")];
+                    case 1:
+                        resp = _a.sent();
+                        return [4 /*yield*/, resp.json()];
+                    case 2:
+                        dat = (_a.sent());
+                        tsts = [];
+                        for (_i = 0, dat_1 = dat; _i < dat_1.length; _i++) {
+                            r = dat_1[_i];
+                            tsts.push({ Expected: r, Actual: predict(r) });
+                        }
+                        this.setState({ Tests: tsts });
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    TestSuite.prototype.render = function () {
+        var _this = this;
+        return React.createElement("div", null,
+            React.createElement(Detail, { Test: this.state.Shown }),
+            React.createElement("div", { style: { marginTop: "200px" } },
+                React.createElement("h3", null, this.state.Tests.length ? React.createElement("span", null,
+                    this.state.Tests.length,
+                    " Test Cases") : React.createElement("span", null, "Loading")),
+                this.state.Tests.map(function (tst, i) { return React.createElement(SingleTest, { key: i, Test: tst, OnEnter: _this.onEnter.bind(_this, tst), OnLeave: _this.onLeave }); })));
+    };
+    return TestSuite;
+}(React.Component));
+var SingleTest = (function (_super) {
+    __extends(SingleTest, _super);
+    function SingleTest() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
-    Hello.prototype.render = function () {
-        return React.createElement("h1", null,
-            "Hello from ",
-            this.props.compiler,
-            " and ",
-            this.props.framework,
-            "!");
+    SingleTest.prototype.render = function () {
+        var ex = this.props.Test.Expected;
+        var style = {
+            background: spriteStyle(ex.Name),
+        };
+        return React.createElement("div", { className: 'test', style: style, onMouseEnter: this.props.OnEnter, onMouseLeave: this.props.OnLeave }, ex.Name);
     };
-    return Hello;
+    return SingleTest;
 }(React.Component));
-ReactDOM.render(React.createElement(Hello, { compiler: "TypeScript", framework: "React" }), document.getElementById("example"));
+var Detail = (function (_super) {
+    __extends(Detail, _super);
+    function Detail() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    Detail.prototype.render = function () {
+        var style = {
+            position: "fixed",
+            top: "0",
+            width: '100%',
+            height: '200px',
+            overflow: "hidden",
+            backgroundColor: 'white',
+        };
+        var content = null;
+        if (this.props.Test) {
+            var ex = this.props.Test.Expected;
+            var ac = this.props.Test.Actual;
+            content =
+                React.createElement("div", null,
+                    ex.Name,
+                    ex.Ingredients.split(",").map(function (ing) {
+                        var style = {
+                            background: spriteStyle(ing),
+                        };
+                        return React.createElement("div", { className: 'test', style: style });
+                    }));
+        }
+        return React.createElement("div", { style: style }, content);
+    };
+    return Detail;
+}(React.Component));
+ReactDOM.render(React.createElement(TestSuite, null), document.getElementById("example"));
+function predict(r) {
+    return {
+        Name: gen_1.Names.DubiousFood,
+        Hearts: 4,
+        Cost: 2,
+    };
+}
+function spriteStyle(name) {
+    var s = gen_1.Sprites[name] || { X: 7, Y: 31 };
+    var xoff = s.X * 96;
+    var yoff = s.Y * 96;
+    return "url(sprites.png) -" + xoff + "px -" + yoff + "px, darkgrey";
+}
+// 0-6. 
+function matchPct(a, b) {
+    var matches = 0;
+    if (a.Name == b.Name) {
+        matches++;
+    }
+    if (a.Cost == b.Cost) {
+        matches++;
+    }
+    if (a.Duration == b.Duration) {
+        matches++;
+    }
+    if (a.EffectString == b.EffectString) {
+        matches++;
+    }
+    if (a.StrengthString == b.StrengthString) {
+        matches++;
+    }
+    if (a.Hearts == b.Hearts) {
+        matches++;
+    }
+    return matches;
+}
 
 
 /***/ }),
@@ -22416,6 +22566,456 @@ var ReactDOMInvalidARIAHook = {
 
 module.exports = ReactDOMInvalidARIAHook;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
+
+/***/ }),
+/* 184 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Names = {
+    Acorn: "Acorn",
+    Amber: "Amber",
+    AncientCore: "Ancient Core",
+    AncientGear: "Ancient Gear",
+    AncientScrew: "Ancient Screw",
+    AncientShaft: "Ancient Shaft",
+    AncientSpring: "Ancient Spring",
+    Apple: "Apple",
+    ApplePie: "Apple Pie",
+    Armoranth: "Armoranth",
+    ArmoredCarp: "Armored Carp",
+    ArmoredPorgy: "Armored Porgy",
+    BakedApple: "Baked Apple",
+    BakedFortifiedPumpkin: "Baked Fortified Pumpkin",
+    BakedPalmFruit: "Baked Palm Fruit",
+    BigHeartyRadish: "Big Hearty Radish",
+    BigHeartyTruffle: "Big Hearty Truffle",
+    BigHeartyTrufflex0: "Big Hearty Truffle x0",
+    BirdEgg: "Bird Egg",
+    BlackenedCrab: "Blackened Crab",
+    BladedRhinoBeetle: "Bladed Rhino Beetle",
+    BlueNightshade: "Blue Nightshade",
+    BlueshellEscargot: "Blueshell Escargot",
+    BokoblinFang: "Bokoblin Fang",
+    BokoblinGuts: "Bokoblin Guts",
+    BokoblinHorn: "Bokoblin Horn",
+    BrightEyedCrab: "Bright-Eyed Crab",
+    CampfireEgg: "Campfire Egg",
+    CaneSugar: "Cane Sugar",
+    CarrotCake: "Carrot Cake",
+    CarrotStew: "Carrot Stew",
+    CharredPepper: "Charred Pepper",
+    ChickalooTreeNut: "Chickaloo Tree Nut",
+    ChillfinTrout: "Chillfin Trout",
+    Chillshroom: "Chillshroom",
+    ChuchuJelly: "Chuchu Jelly",
+    ClamChowder: "Clam Chowder",
+    ColdDarner: "Cold Darner",
+    CoolSafflina: "Cool Safflina",
+    CopiousFriedWildGreens: "Copious Fried Wild Greens",
+    CopiousMeatSkewers: "Copious Meat Skewers",
+    CopiousMushroomSkewers: "Copious Mushroom Skewers",
+    CopiousSeafoodSkewers: "Copious Seafood Skewers",
+    CopiousSimmeredFruits: "Copious Simmered Fruits",
+    CourserBeeHoney: "Courser Bee Honey",
+    CrabOmeletwithRice: "Crab Omelet with Rice",
+    CrabRisotto: "Crab Risotto",
+    CrabStirFry: "Crab Stir-Fry",
+    CreamofMushroomSoup: "Cream of Mushroom Soup",
+    CreamofVegetableSoup: "Cream of Vegetable Soup",
+    CreamyHeartSoup: "Creamy Heart Soup",
+    CreamyMeatSoup: "Creamy Meat Soup",
+    CreamySeafoodSoup: "Creamy Seafood Soup",
+    CurryPilaf: "Curry Pilaf",
+    CurryRice: "Curry Rice",
+    Diamantx0: "Diamant x0",
+    Diamond: "Diamond",
+    DinraalsClaw: "Dinraal's Claw",
+    DinraalsScale: "Dinraal's Scale",
+    DubiousFood: "Dubious Food",
+    EggPudding: "Egg Pudding",
+    EggTart: "Egg Tart",
+    ElectricDarner: "Electric Darner",
+    ElectricKeeseWing: "Electric Keese Wing",
+    ElectricSafflina: "Electric Safflina",
+    Elixir: "Elixir",
+    EnduraCarrot: "Endura Carrot",
+    EnduraShroom: "Endura Shroom",
+    EnergeticRhinoBeetle: "Energetic Rhino Beetle",
+    Fairy: "Fairy",
+    FairyTonic: "Fairy Tonic",
+    FaroshsClaw: "Farosh's Claw",
+    FaroshsScale: "Farosh's Scale",
+    FireKeeseWing: "Fire Keese Wing",
+    FireproofLizard: "Fireproof Lizard",
+    FishPie: "Fish Pie",
+    FishSkewer: "Fish Skewer",
+    FishandMushroomSkewer: "Fish and Mushroom Skewer",
+    FleetLotusSeeds: "Fleet-Lotus Seeds",
+    Flint: "Flint",
+    FortifiedPumpkin: "Fortified Pumpkin",
+    FragrantMushroomSaute: "Fragrant Mushroom Sauté",
+    FreshMilk: "Fresh Milk",
+    FriedBananas: "Fried Bananas",
+    FriedEggandRice: "Fried Egg and Rice",
+    FriedWildGreens: "Fried Wild Greens",
+    FrozenBass: "Frozen Bass",
+    FrozenBirdDrumstick: "Frozen Bird Drumstick",
+    FrozenBirdThigh: "Frozen Bird Thigh",
+    FrozenCarp: "Frozen Carp",
+    FrozenCrab: "Frozen Crab",
+    FrozenHeartyBass: "Frozen Hearty Bass",
+    FrozenHeartySalmon: "Frozen Hearty Salmon",
+    FrozenPorgy: "Frozen Porgy",
+    FrozenRiverSnail: "Frozen River Snail",
+    FrozenTrout: "Frozen Trout",
+    FrozenWholeBird: "Frozen Whole Bird",
+    FruitPie: "Fruit Pie",
+    FruitandMushroomMix: "Fruit and Mushroom Mix",
+    Fruitcake: "Fruitcake",
+    GiantAncientCore: "Giant Ancient Core",
+    GlazedMeat: "Glazed Meat",
+    GlazedMushroom: "Glazed Mushroom",
+    GlazedSeafood: "Glazed Seafood",
+    GlazedVeggies: "Glazed Veggies",
+    GoatButter: "Goat Butter",
+    GoronSpice: "Goron Spice",
+    GourmetMeatCurry: "Gourmet Meat Curry",
+    GourmetMeatStew: "Gourmet Meat Stew",
+    GourmetMeatandRiceBowl: "Gourmet Meat and Rice Bowl",
+    GourmetMeatandSeafoodFry: "Gourmet Meat and Seafood Fry",
+    GourmetPoultryCurry: "Gourmet Poultry Curry",
+    GourmetPoultryPilaf: "Gourmet Poultry Pilaf",
+    GourmetSpicedMeatSkewer: "Gourmet Spiced Meat Skewer",
+    HardBoiledEgg: "Hard-Boiled Egg",
+    HeartyBass: "Hearty Bass",
+    HeartyBlueshellSnail: "Hearty Blueshell Snail",
+    HeartyDurian: "Hearty Durian",
+    HeartyLizard: "Hearty Lizard",
+    HeartyRadish: "Hearty Radish",
+    HeartySalmon: "Hearty Salmon",
+    HeartyTruffle: "Hearty Truffle",
+    HeartyTrufflex0: "Hearty Truffle x0",
+    HerbSaute: "Herb Sauté",
+    HightailLizard: "Hightail Lizard",
+    HinoxGuts: "Hinox Guts",
+    HinoxToenail: "Hinox Toenail",
+    HinoxTooth: "Hinox Tooth",
+    HoneyCandy: "Honey Candy",
+    HoneyCrepe: "Honey Crepe",
+    HoneyedApple: "Honeyed Apple",
+    HoneyedFruits: "Honeyed Fruits",
+    HotButteredApple: "Hot Buttered Apple",
+    HotFootedFrog: "Hot-Footed Frog",
+    Hydromelon: "Hydromelon",
+    HylianBass: "Hylian Bass",
+    HylianMushroom: "Hylian Mushroom",
+    HylianRice: "Hylian Rice",
+    HyruleHerb: "Hyrule Herb",
+    IceKeeseWing: "Ice Keese Wing",
+    IcyGourmetMeat: "Icy Gourmet Meat",
+    IcyHeartyBlueshellSnail: "Icy Hearty Blueshell Snail",
+    IcyLizalfosTail: "Icy Lizalfos Tail",
+    IcyMeat: "Icy Meat",
+    IcyPrimeMeat: "Icy Prime Meat",
+    IronshellCrab: "Ironshell Crab",
+    Ironshroom: "Ironshroom",
+    KeeseEyeball: "Keese Eyeball",
+    KeeseWing: "Keese Wing",
+    LizalfosHorn: "Lizalfos Horn",
+    LizalfosTail: "Lizalfos Tail",
+    LizalfosTalon: "Lizalfos Talon",
+    LuminousStone: "Luminous Stone",
+    LynelGuts: "Lynel Guts",
+    LynelHoof: "Lynel Hoof",
+    LynelHorn: "Lynel Horn",
+    MeatCurry: "Meat Curry",
+    MeatPie: "Meat Pie",
+    MeatSkewer: "Meat Skewer",
+    MeatStew: "Meat Stew",
+    MeatStuffedPumpkin: "Meat-Stuffed Pumpkin",
+    MeatandMushroomSkewer: "Meat and Mushroom Skewer",
+    MeatandRiceBowl: "Meat and Rice Bowl",
+    MeatandSeafoodFry: "Meat and Seafood Fry",
+    MeatyRiceBalls: "Meaty Rice Balls",
+    MightyBananas: "Mighty Bananas",
+    MightyCarp: "Mighty Carp",
+    MightyPorgy: "Mighty Porgy",
+    MightyThistle: "Mighty Thistle",
+    Milk: "Milk",
+    MoblinFang: "Moblin Fang",
+    MoblinGuts: "Moblin Guts",
+    MoblinHorn: "Moblin Horn",
+    MoldugaFin: "Molduga Fin",
+    MoldugaGuts: "Molduga Guts",
+    MonsterCake: "Monster Cake",
+    MonsterCurry: "Monster Curry",
+    MonsterExtract: "Monster Extract",
+    MonsterRiceBalls: "Monster Rice Balls",
+    MonsterSoup: "Monster Soup",
+    MonsterStew: "Monster Stew",
+    MushroomOmelet: "Mushroom Omelet",
+    MushroomRiceBalls: "Mushroom Rice Balls",
+    MushroomRisotto: "Mushroom Risotto",
+    MushroomSkewer: "Mushroom Skewer",
+    Nutcake: "Nutcake",
+    NyadrasClaw: "Nyadra's Claw",
+    NyadrasScale: "Nyadra's Scale",
+    OctoBalloon: "Octo Balloon",
+    OctorokEyeball: "Octorok Eyeball",
+    OctorokTentacle: "Octorok Tentacle",
+    Omelet: "Omelet",
+    Opal: "Opal",
+    PalmFruit: "Palm Fruit",
+    PepperSeafood: "Pepper Seafood",
+    PepperSteak: "Pepper Steak",
+    PlainCrepe: "Plain Crepe",
+    PorgyMeuniere: "Porgy Meunière",
+    PoultryCurry: "Poultry Curry",
+    PoultryPilaf: "Poultry Pilaf",
+    PrimeMeatCurry: "Prime Meat Curry",
+    PrimeMeatStew: "Prime Meat Stew",
+    PrimeMeatandRiceBowl: "Prime Meat and Rice Bowl",
+    PrimeMeatandSeafoodFry: "Prime Meat and Seafood Fry",
+    PrimePoultryCurry: "Prime Poultry Curry",
+    PrimePoultryPilaf: "Prime Poultry Pilaf",
+    PrimeSpicedMeatSkewer: "Prime Spiced Meat Skewer",
+    PumpkinPie: "Pumpkin Pie",
+    PumpkinStew: "Pumpkin Stew",
+    RawBirdDrumstick: "Raw Bird Drumstick",
+    RawBirdThigh: "Raw Bird Thigh",
+    RawGourmetMeat: "Raw Gourmet Meat",
+    RawMeat: "Raw Meat",
+    RawPrimeMeat: "Raw Prime Meat",
+    RawWholeBird: "Raw Whole Bird",
+    RazorclawCrab: "Razorclaw Crab",
+    Razorshroom: "Razorshroom",
+    RedChuchuJelly: "Red Chuchu Jelly",
+    RedLizalfosTail: "Red Lizalfos Tail",
+    RestlessCricket: "Restless Cricket",
+    RoastedAcorn: "Roasted Acorn",
+    RoastedArmoranth: "Roasted Armoranth",
+    RoastedBass: "Roasted Bass",
+    RoastedBigRadish: "Roasted Big Radish",
+    RoastedBirdDrumstick: "Roasted Bird Drumstick",
+    RoastedBirdThigh: "Roasted Bird Thigh",
+    RoastedCarp: "Roasted Carp",
+    RoastedEnduraCarrot: "Roasted Endura Carrot",
+    RoastedHeartyBass: "Roasted Hearty Bass",
+    RoastedHeartyDurian: "Roasted Hearty Durian",
+    RoastedHeartySalmon: "Roasted Hearty Salmon",
+    RoastedHydromelon: "Roasted Hydromelon",
+    RoastedLotusSeed: "Roasted Lotus Seed",
+    RoastedMightyBananas: "Roasted Mighty Bananas",
+    RoastedMightyThistle: "Roasted Mighty Thistle",
+    RoastedPorgy: "Roasted Porgy",
+    RoastedRadish: "Roasted Radish",
+    RoastedSwiftCarrot: "Roasted Swift Carrot",
+    RoastedTreeNut: "Roasted Tree Nut",
+    RoastedTrout: "Roasted Trout",
+    RoastedVoltfruit: "Roasted Voltfruit",
+    RoastedWholeBird: "Roasted Whole Bird",
+    RoastedWildberry: "Roasted Wildberry",
+    RockHardFood: "Rock-Hard Food",
+    RockSalt: "Rock Salt",
+    Ruby: "Ruby",
+    RuggedRhinoBeetle: "Rugged Rhino Beetle",
+    Rushroom: "Rushroom",
+    SalmonMeuniere: "Salmon Meunière",
+    SalmonRisotto: "Salmon Risotto",
+    SaltGrilledCrab: "Salt-Grilled Crab",
+    SaltGrilledFish: "Salt-Grilled Fish",
+    SaltGrilledGourmetMeat: "Salt-Grilled Gourmet Meat",
+    SaltGrilledGreens: "Salt-Grilled Greens",
+    SaltGrilledMeat: "Salt-Grilled Meat",
+    SaltGrilledMushrooms: "Salt-Grilled Mushrooms",
+    SaltGrilledPrimeMeat: "Salt-Grilled Prime Meat",
+    SankeCarp: "Sanke Carp",
+    Sapphire: "Sapphire",
+    SauteedNuts: "Sautéed Nuts",
+    SauteedPeppers: "Sautéed Peppers",
+    SeafoodCurry: "Seafood Curry",
+    SeafoodFriedRice: "Seafood Fried Rice",
+    SeafoodMeuniere: "Seafood Meunière",
+    SeafoodPaella: "Seafood Paella",
+    SeafoodRiceBalls: "Seafood Rice Balls",
+    SeafoodSkewers: "Seafood Skewers",
+    SearedGourmetSteak: "Seared Gourmet Steak",
+    SearedPrimeSteak: "Seared Prime Steak",
+    SearedSteak: "Seared Steak",
+    ShardofDinraalsFang: "Shard of Dinraal's Fang",
+    ShardofDinraalsHorn: "Shard of Dinraal's Horn",
+    ShardofFaroshsFang: "Shard of Farosh's Fang",
+    ShardofFaroshsHorn: "Shard of Farosh's Horn",
+    ShardofNyadrasFang: "Shard of Nyadra's Fang",
+    ShardofNyadrasHorn: "Shard of Nyadra's Horn",
+    SilentPrincess: "Silent Princess",
+    SilentShroom: "Silent Shroom",
+    SimmeredFruits: "Simmered Fruits",
+    SizzlefinTrout: "Sizzlefin Trout",
+    SmotherwingButterfly: "Smotherwing Butterfly",
+    SneakyRiverEscargot: "Sneaky River Escargot",
+    SneakyRiverSnail: "Sneaky River Snail",
+    SpicedMeatSkewer: " Spiced Meat Skewer",
+    SpicyPepper: "Spicy Pepper",
+    StamellaMushroom: "Stamella Mushroom",
+    StaminokaBass: "Staminoka Bass",
+    StarFragment: "Star Fragment",
+    StealthfinTrout: "Stealthfin Trout",
+    SteamedFish: "Steamed Fish",
+    SteamedFruit: "Steamed Fruit",
+    SteamedMeat: "Steamed Meat",
+    SteamedMushrooms: "Steamed Mushrooms",
+    SummerwingButterfly: "Summerwing Butterfly",
+    SunsetFirefly: "Sunset Firefly",
+    Sunshroom: "Sunshroom",
+    SwiftCarrot: "Swift Carrot",
+    SwiftViolet: "Swift Violet",
+    TabanthaWheat: "Tabantha Wheat",
+    ThunderwingButterfly: "Thunderwing Butterfly",
+    TirelessFrog: "Tireless Frog",
+    ToastedBigHeartTruffle: "Toasted Big Heart Truffle",
+    ToastedHeartyTruffle: "Toasted Hearty Truffle",
+    ToastyChillshroom: "Toasty Chillshroom",
+    ToastyEnduraShroom: "Toasty Endura Shroom",
+    ToastyHylianShroom: "Toasty Hylian Shroom",
+    ToastyIronshroom: "Toasty Ironshroom",
+    ToastyRazorshroom: "Toasty Razorshroom",
+    ToastyRushroom: "Toasty Rushroom",
+    ToastySilentShroom: "Toasty Silent Shroom",
+    ToastyStamellaShroom: "Toasty Stamella Shroom",
+    ToastySunshroom: "Toasty Sunshroom",
+    ToastyZapshroom: "Toasty Zapshroom",
+    Topaz: "Topaz",
+    VegetableCurry: "Vegetable Curry",
+    VegetableOmelet: "Vegetable Omelet",
+    VegetableRisotto: "Vegetable Risotto",
+    VeggieCreamSoup: "Veggie Cream Soup",
+    VeggieRiceBalls: "Veggie Rice Balls",
+    VoltfinTrout: "Voltfin Trout",
+    Voltfruit: "Voltfruit",
+    WarmDarner: "Warm Darner",
+    WarmSafflina: "Warm Safflina",
+    WheatBread: "Wheat Bread",
+    WhiteChuchuJelly: "White Chuchu Jelly",
+    Wildberry: "Wildberry",
+    WildberryCrepe: "Wildberry Crepe",
+    WinterwingButterfly: "Winterwing Butterfly",
+    Wood: "Wood",
+    YellowChuchuJelly: "Yellow Chuchu Jelly",
+    YellowLizalfosTail: "Yellow Lizalfos Tail",
+    Zapshroom: "Zapshroom",
+};
+exports.Sprites = {
+    "Acorn": { X: 18, Y: 28 },
+    "Ancient Screw": { X: 1, Y: 27 },
+    "Ancient Spring": { X: 2, Y: 27 },
+    "Apple": { X: 7, Y: 28 },
+    "Armoranth": { X: 31, Y: 29 },
+    "Armored Carp": { X: 37, Y: 27 },
+    "Armored Porgy": { X: 36, Y: 27 },
+    "Big Hearty Radish": { X: 27, Y: 29 },
+    "Big Hearty Truffle": { X: 11, Y: 29 },
+    "Bird Egg": { X: 26, Y: 28 },
+    "Bladed Rhino Beetle": { X: 8, Y: 0 },
+    "Blue Nightshade": { X: 32, Y: 29 },
+    "Bokoblin Fang": { X: 19, Y: 26 },
+    "Bokoblin Horn": { X: 18, Y: 26 },
+    "Bright-Eyed Crab": { X: 22, Y: 28 },
+    "Cane Sugar": { X: 23, Y: 28 },
+    "Chickaloo Tree Nut": { X: 19, Y: 28 },
+    "Chillfin Trout": { X: 32, Y: 27 },
+    "Chillshroom": { X: 1, Y: 29 },
+    "Chuchu Jelly": { X: 11, Y: 27 },
+    "Cold Darner": { X: 5, Y: 0 },
+    "Cool Safflina": { X: 28, Y: 29 },
+    "Courser Bee Honey": { X: 15, Y: 21 },
+    "Dubious Food": { X: 11, Y: 26 },
+    "Electric Darner": { X: 10, Y: 0 },
+    "Electric Safflina": { X: 34, Y: 29 },
+    "Endura Carrot": { X: 37, Y: 29 },
+    "Endura Shroom": { X: 13, Y: 29 },
+    "Energetic Rhino Beetle": { X: 2, Y: 0 },
+    "Fireproof Lizard": { X: 20, Y: 0 },
+    "Fleet-Lotus Seeds": { X: 12, Y: 28 },
+    "Fortified Pumpkin": { X: 17, Y: 28 },
+    "Fresh Milk": { X: 27, Y: 28 },
+    "Goat Butter": { X: 29, Y: 28 },
+    "Goron Spice": { X: 24, Y: 28 },
+    "Hearty Bass": { X: 31, Y: 27 },
+    "Hearty Blueshell Snail": { X: 1, Y: 28 },
+    "Hearty Durian": { X: 10, Y: 28 },
+    "Hearty Lizard": { X: 12, Y: 0 },
+    "Hearty Radish": { X: 26, Y: 29 },
+    "Hearty Salmon": { X: 38, Y: 27 },
+    "Hearty Truffle": { X: 5, Y: 29 },
+    "Hightail Lizard": { X: 18, Y: 0 },
+    "Hinox Toenail": { X: 6, Y: 27 },
+    "Hot-Footed Frog": { X: 1, Y: 0 },
+    "Hydromelon": { X: 13, Y: 28 },
+    "Hylian Bass": { X: 30, Y: 27 },
+    "Hylian Mushroom": { X: 4, Y: 29 },
+    "Hylian Rice": { X: 25, Y: 28 },
+    "Hyrule Herb": { X: 25, Y: 29 },
+    "Ironshell Crab": { X: 21, Y: 28 },
+    "Ironshroom": { X: 10, Y: 29 },
+    "Keese Wing": { X: 33, Y: 26 },
+    "Lizalfos Horn": { X: 21, Y: 26 },
+    "Lizalfos Talon": { X: 22, Y: 26 },
+    "Lynel Horn": { X: 27, Y: 26 },
+    "Mighty Bananas": { X: 15, Y: 28 },
+    "Mighty Carp": { X: 34, Y: 27 },
+    "Mighty Porgy": { X: 35, Y: 27 },
+    "Mighty Thistle": { X: 30, Y: 29 },
+    "Moblin Fang": { X: 25, Y: 26 },
+    "Moblin Horn": { X: 24, Y: 26 },
+    "Monster Extract": { X: 31, Y: 28 },
+    "Octo Balloon": { X: 28, Y: 27 },
+    "Octorok Tentacle": { X: 35, Y: 26 },
+    "Palm Fruit": { X: 14, Y: 28 },
+    "Raw Bird Drumstick": { X: 34, Y: 28 },
+    "Raw Bird Thigh": { X: 35, Y: 28 },
+    "Raw Gourmet Meat": { X: 36, Y: 28 },
+    "Raw Meat": { X: 34, Y: 28 },
+    "Raw Prime Meat": { X: 33, Y: 28 },
+    "Raw Whole Bird": { X: 37, Y: 28 },
+    "Razorclaw Crab": { X: 20, Y: 28 },
+    "Razorshroom": { X: 9, Y: 29 },
+    "Restless Cricket": { X: 9, Y: 0 },
+    "Rock Salt": { X: 22, Y: 29 },
+    "Rock-Hard Food": { X: 12, Y: 26 },
+    "Rugged Rhino Beetle": { X: 15, Y: 0 },
+    "Rushroom": { X: 38, Y: 28 },
+    "Sanke Carp": { X: 6, Y: 28 },
+    "Silent Princess": { X: 33, Y: 29 },
+    "Silent Shroom": { X: 8, Y: 29 },
+    "Simmered Fruits": { X: 15, Y: 23 },
+    "Sizzlefin Trout": { X: 0, Y: 28 },
+    "Smotherwing Butterfly": { X: 3, Y: 0 },
+    "Sneaky River Snail": { X: 4, Y: 28 },
+    "Spicy Pepper": { X: 16, Y: 28 },
+    "Stamella Mushroom": { X: 0, Y: 29 },
+    "Staminoka Bass": { X: 2, Y: 28 },
+    "Stealthfin Trout": { X: 5, Y: 28 },
+    "Summerwing Butterfly": { X: 16, Y: 0 },
+    "Sunset Firefly": { X: 6, Y: 0 },
+    "Sunshroom": { X: 2, Y: 29 },
+    "Swift Carrot": { X: 35, Y: 29 },
+    "Swift Violet": { X: 36, Y: 29 },
+    "Tabantha Wheat": { X: 30, Y: 28 },
+    "Thunderwing Butterfly": { X: 17, Y: 0 },
+    "Tireless Frog": { X: 4, Y: 0 },
+    "Voltfin Trout": { X: 33, Y: 27 },
+    "Voltfruit": { X: 21, Y: 28 },
+    "Warm Darner": { X: 19, Y: 0 },
+    "Warm Safflina": { X: 29, Y: 29 },
+    "Wildberry": { X: 8, Y: 28 },
+    "Winterwing Butterfly": { X: 13, Y: 0 },
+    "Zapshroom": { X: 7, Y: 29 },
+};
+
 
 /***/ })
 /******/ ]);

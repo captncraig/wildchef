@@ -48,6 +48,8 @@ func clean(s string) string {
 	for _, bad := range []string{" ", "-", "'"} {
 		s = strings.Replace(s, bad, "", -1)
 	}
+	s = strings.Replace(s, "è", "e", -1)
+	s = strings.Replace(s, "é", "e", -1)
 	return s
 }
 
